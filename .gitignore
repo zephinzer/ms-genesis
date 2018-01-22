@@ -1,0 +1,5 @@
+coverage
+data/db/*
+node_modules
+routes/*
+!routes/empty

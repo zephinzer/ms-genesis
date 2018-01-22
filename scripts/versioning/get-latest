@@ -1,0 +1,53 @@
+#!/bin/bash
+help () { printf "
+*************
+get-latest.sh
+*************
+retrieves the latest git tag that resembles a semver versioning (x.y.z) where x is
+the major version, y is the minor version and z is the patch version. exits with code
+1 if no version is found, exists with code 0 if version is found.
+
+options:
+\t-m --merged         : get only tags that apply to the current branch
+\t-q --quiet          : suppresses debug prints
+\t-h --help           : prints this text
+
+usage:
+\t./get-latest.sh <dash_suffix> [...options]
+\t\t<dash_suffix> : String
+
+examples:
+\t./get-latest.sh dev
+\t\tgets the latest version suffixed with '-dev'
+\t\tif there exists git tags 1.0.0-dev and 1.0.1-dev, this will return 1.0.1-dev
+";
+}
+
+if [[ $* == *-h* ]] || [[ $* == *--help* ]]; then help; exit 1; fi;
+if [[ $* == *-q* ]] || [[ $* == *--quiet* ]]; then exec 6>&1; exec > /dev/null; fi;
+
+VERSION_SELECTOR="^[0-9]+\.[0-9]+\.[0-9]+"
+printf "\nVERSION_SELECTOR: ${VERSION_SELECTOR}\n";
+[[ "$1" != "" ]] && [[ "$1" != "-q" ]] && VERSION_SELECTOR="${VERSION_SELECTOR}\-${1}";
+if [[ $* == *-m* ]] || [[ $* == *--merged* ]]; then
+  VERSION=$(git tag -l --merged | egrep "${VERSION_SELECTOR}$" | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n | tail -n 1);
+else
+  VERSION=$(git tag -l | egrep "${VERSION_SELECTOR}$" | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n | tail -n 1);
+fi;
+if [[ $VERSION = "" ]]; then
+  printf "
+ERROR: could not find a git tag that resembles a semver version (x.y.z).
+\t> To add a 1.0.3 tag, run 'git tag 1.0.3'
+\t> Exiting with status code 1.
+
+";
+  exit 1;
+else
+  printf "VERSION: ";
+fi;
+
+
+if [[ $* == *-q* ]] || [[ $* == *--quiet* ]]; then exec 1>&6 6>&-; fi;
+
+printf "$VERSION\n";
+exit 0;
