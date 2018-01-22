@@ -88,6 +88,8 @@ See https://github.com/zephinzer/express-diroutes for more information on the ro
 
 ## Database
 
+Database migrations and seeds can be executed using the scripts found in `./provisioning`.
+
 ### Migrations
 
 Create a new directory called `db` and create a sub-directory in there named `migrations`. New migrations can be placed in that directory and will automatically be run.
